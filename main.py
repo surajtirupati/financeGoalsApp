@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
+from forms import FinancialDataForm
 
 app = Flask(__name__)
 
+app.config['SECRET_KEY'] = 'fefbb128d6df70ee4c3d697223e80958'
 
 @app.route("/")
 def home():
@@ -28,6 +30,10 @@ def custom_goal():
     return render_template("custom_goal.html")
 
 
-@app.route("/register")
-def register():
-    return render_template("register.html")
+@app.route("/setup", methods=['GET', 'POST'])
+def setup():
+    form = FinancialDataForm()
+    if form.validate_on_submit():
+        flash("Setup complete!", 'success')
+        return redirect(url_for('dashboard'))
+    return render_template("setup.html", form=form)

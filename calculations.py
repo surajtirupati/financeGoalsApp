@@ -43,6 +43,9 @@ def less_ni_contributions(gross: float) -> float:
 def less_student_loan(gross: float, plan: int) -> float:
     annual_student_loan = 0
 
+    if plan == 0:
+        return annual_student_loan
+
     if plan == 1:
         if gross > 12 * PLAN_1_MNTHLY_THRES:
             annual_student_loan = 0.09 * (gross - 12 * PLAN_1_MNTHLY_THRES)
@@ -75,7 +78,7 @@ def deduct_fixed_costs(disposable: float, fcs: [dict[float], list[float]]) -> fl
     return personal_income
 
 
-def calculate_saving_target(personal_inc: float, saving_perc: float) -> float:
+def calculate_saving_income(personal_inc: float, saving_perc: float) -> float:
     return personal_inc * saving_perc
 
 

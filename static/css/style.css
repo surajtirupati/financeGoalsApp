@@ -58,3 +58,5 @@ nav .navbar-nav .dropdown-menu a{
     margin-left: -15rem;
   }
 }
+
+header > h5 { display: inline-block; }

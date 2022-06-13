@@ -1,3 +1,34 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField
-from wtforms.validators import DataRequired, Length
+from wtforms import Form, StringField, FloatField, SelectField, FormField, FieldList, SubmitField
+from wtforms.validators import DataRequired, NumberRange
+
+
+class FixedCostForm(Form):
+    name = StringField("Fixed Cost Name e.g. Rent", validators=[DataRequired()])
+    amount = FloatField("Fixed Cost Monthly Amount e.g. 800", validators=[DataRequired()])
+
+
+class GoalForm(Form):
+    name = StringField("What are you saving for?", validators=[DataRequired()])
+    amount = FloatField("What percentage of your savings would you like to allocate to this goal? e.g. 0.25 for 25%",
+                        validators=[DataRequired(), NumberRange(min=0, max=1, message='Enter number between 0 and 1')])
+
+
+class FinancialDataForm(FlaskForm):
+    gross_salary = FloatField('Gross Salary', validators=[DataRequired(),
+                                                          NumberRange(min=0,
+                                                                      max=26500000000,
+                                                                      message='Please enter a valid number')])
+    student_plan = SelectField("Student Loan Plan Type", choices=[(0, "None"), (1, "Plan 1"), (2, "Plan 2")],
+                               validators=[DataRequired()])
+    pension_contribution = FloatField("Salary Contribution to Pension e.g. 0.05 for 5%", validators=[DataRequired(),
+                                                                                                     NumberRange(min=0,
+                                                                                                                 max=1,
+                                                                                                                 message='Enter number between 0 and 1')])
+    fixed_costs = FieldList(FormField(FixedCostForm), min_entries=1)
+    saving_percentage = FloatField("What percentage of your income after monthly fixed costs are deducted would you "
+                                   "like to save? e.g. 0.25 for 25%", validators=[DataRequired(), NumberRange(min=0,
+                                                                                                              max=1,
+                                                                                                              message='Enter number between 0 and 1')])
+    goals = FieldList(FormField(GoalForm), min_entries=1)
+    submit = SubmitField('Submit')
