@@ -1,9 +1,35 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_sqlalchemy import SQLAlchemy
 from forms import FinancialDataForm
 
 app = Flask(__name__)
-
 app.config['SECRET_KEY'] = 'fefbb128d6df70ee4c3d697223e80958'
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///financial_app.db"
+db = SQLAlchemy(app)
+
+
+class UserFinancialData(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    gross_salary = db.Column(db.Float, nullable=False)
+    student_plan = db.Column(db.Integer)
+    pension_contribution = db.Column(db.Float, nullable=False)
+    fixed_costs = db.relationship('FixedCost', backref='financialdata', lazy=True)
+    goals = db.relationship('Goals', backref='financialdata', lazy=True)
+
+
+class FixedCost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    earnings_id = db.Column(db.Integer, db.ForeignKey("userfinancialdata.id"), nullable=False)
+
+
+class Goals(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    earnings_id = db.Column(db.Integer, db.ForeignKey("userfinancialdata.id"), nullable=False)
+
 
 @app.route("/")
 def home():
