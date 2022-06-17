@@ -42,9 +42,12 @@
                     {% endfor %}
                 {% endif %}
             {% endwith %}
+
+            <!-- new content starts here -->
+
             <form method="POST" action="">
                 {{ form.hidden_tag() }}
-                <fieldset class="form-grouo">
+                <fieldset class="form-group">
                     <legend class="border-bottom mb-4"> Account Setup</legend>
                     <div class="form-group">
                         <header>
@@ -169,6 +172,7 @@
                 </fieldset>
             </form>
         </div>
+
 
     </div>
     <!-- /#page-content-wrapper -->

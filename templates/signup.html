@@ -1,0 +1,54 @@
+{% extends "prelogin_base.html" %}
+
+{% block content %}
+
+<form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4"> Sign Up</legend>
+                    <div class="form-group">
+                        {{ form.email.label(class="form-control-label") }}
+                        {% if form.email.errors %}
+                            {{ form.email(class="form-control form-control-sm is-invalid") }}
+                            <div class="invalid feedback">
+                                {% for error in form.email.errors %}
+                                    <span> {{ error }} </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.email(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.password_hash.label(class="form-control-label") }}
+                        {% if form.password_hash.errors %}
+                            {{ form.password_hash(class="form-control form-control-sm is-invalid") }}
+                            <div class="invalid feedback">
+                                {% for error in form.password_hash.errors %}
+                                    <span> {{ error }} </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.password_hash(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.password_hash2.label(class="form-control-label") }}
+                        {% if form.password_hash2.errors %}
+                            {{ form.password_hash2(class="form-control form-control-sm is-invalid") }}
+                            <div class="invalid feedback">
+                                {% for error in form.password_hash2.errors %}
+                                    <span> {{ error }} </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.password_hash2(class="form-control form-control-sm") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+            </fieldset>
+</form>
+
+{% endblock %}
