@@ -27,6 +27,11 @@
   min-width: 100vw;
 }
 
+#pre-login{
+  width:800px !important; /*change the value to suite ur need*/
+  margin:0 auto; /*this will center ur content*/
+}
+
 nav .navbar-nav li a{
   color: white !important;
 }

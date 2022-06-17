@@ -54,14 +54,14 @@
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="#">Edit Finances</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Log Out</a>
+                            <a class="dropdown-item" href="{{ url_for('logout') }}">Log Out</a>
                         </div>
                     </li>
                 </ul>
             </div>
         </nav>
 
-        <div class="container-fluid">
+        <div class="container-fluid" id="post-login">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}

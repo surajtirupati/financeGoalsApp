@@ -9,16 +9,6 @@ app.config['SECRET_KEY'] = 'fefbb128d6df70ee4c3d697223e80958'
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///financial_app.db"
 db = SQLAlchemy(app)
 
-# Flask_Login Stuff
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return Users.query.get(int(user_id))
-
 
 class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -51,11 +41,29 @@ class Goals(db.Model):
     earnings_id = db.Column(db.Integer, db.ForeignKey("userfinancialdata.id"), nullable=False)
 
 
+# Create database tables
 db.create_all()
+
+# Flask_Login stuff
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
+
+def user_is_logged_in():
+    return current_user.is_authenticated
 
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    if user_is_logged_in():
+        return redirect(url_for('dashboard'))
+
     form = UserForm()
     if form.validate_on_submit():
         user = Users.query.filter_by(email=form.email.data).first()
@@ -67,7 +75,7 @@ def signup():
             flash("Successful sign up! Please login:", 'success')
 
         else:
-            flash("User email already exists! Please login:")
+            flash("User email already exists! Please login", 'danger')
 
         return redirect(url_for('login'))
 
@@ -77,6 +85,9 @@ def signup():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if user_is_logged_in():
+        return redirect(url_for('dashboard'))
+
     form = LoginForm()
     if form.validate_on_submit():
         user = Users.query.filter_by(email=form.email.data).first()
@@ -84,52 +95,71 @@ def login():
             if check_password_hash(user.password_hash, form.password.data):
                 login_user(user)
                 flash("Login Successful!", 'success')
-                return redirect(url_for('setup'))
+
+                if current_user.financial_data is not None:
+                    return redirect(url_for('dashboard'))
+
+                else:
+                    return redirect(url_for('setup'))
 
             else:
-                flash("Wrong Password - Try Again!", 'error')
+                flash("Wrong Password - Try Again!", 'danger')
 
         else:
-            flash("That User Doesn't Exist! Try Again...", 'error')
+            flash("That User Doesn't Exist! Try Again:", 'danger')
 
     return render_template('login.html', form=form)
 
 
+@app.route("/setup", methods=['GET', 'POST'])
 @login_required
+def setup():
+    if current_user.financial_data is not None:
+        flash("You have already input your financial data!", 'danger')
+        return redirect(url_for('dashboard'))
+
+    form = FinancialDataForm()
+    
+    if form.validate_on_submit():
+        flash("Setup complete!", 'success')
+        return redirect(url_for('dashboard'))
+
+    return render_template("setup.html", form=form)
+
+
 @app.route("/")
+@login_required
 def home():
     return render_template("base.html")
 
 
-@login_required
 @app.route("/my_finances")
+@login_required
 def my_finances():
     return render_template("my_finances.html")
 
 
-@login_required
 @app.route("/dashboard")
+@login_required
 def dashboard():
     return render_template("dashboard.html")
 
 
-@login_required
 @app.route("/goal_progress")
+@login_required
 def goal_progress():
     return render_template("goal_progress.html")
 
 
-@login_required
 @app.route("/custom_goal")
+@login_required
 def custom_goal():
     return render_template("custom_goal.html")
 
 
+@app.route('/logout', methods=['GET', 'POST'])
 @login_required
-@app.route("/setup", methods=['GET', 'POST'])
-def setup():
-    form = FinancialDataForm()
-    if form.validate_on_submit():
-        flash("Setup complete!", 'success')
-        return redirect(url_for('dashboard'))
-    return render_template("setup.html", form=form)
+def logout():
+    logout_user()
+    flash("You have successfully been logged out!", 'success')
+    return redirect(url_for('login'))
