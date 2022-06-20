@@ -5,13 +5,13 @@ from wtforms.validators import DataRequired, NumberRange, EqualTo
 
 # Create Fixed Cost Sub-Form
 class FixedCostForm(Form):
-    name = StringField("Fixed Cost Name e.g. Rent", validators=[DataRequired()])
+    fc_name = StringField("Fixed Cost Name e.g. Rent", validators=[DataRequired()])
     amount = FloatField("Fixed Cost Monthly Amount e.g. 800", validators=[DataRequired()])
 
 
 # Create Goal Sub-Form
 class GoalForm(Form):
-    name = StringField("What are you saving for?", validators=[DataRequired()])
+    goal_name = StringField("What are you saving for?", validators=[DataRequired()])
     amount = FloatField("What percentage of your savings would you like to allocate to this goal? e.g. 0.25 for 25%",
                         validators=[DataRequired(), NumberRange(min=0, max=1, message='Enter number between 0 and 1')])
 

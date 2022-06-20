@@ -67,16 +67,16 @@
               <span>(give one example - you will have the chance to add more later)</span>
             </header>
             {% for object in form.fixed_costs %}
-                {{ object.form.name.label(class="form-control-label") }}
-                {% if object.form.name.errors %}
-                    {{ object.form.name(class="form-control form-control-sm is-invalid") }}
+                {{ object.form.fc_name.label(class="form-control-label") }}
+                {% if object.form.fc_name.errors %}
+                    {{ object.form.fc_name(class="form-control form-control-sm is-invalid") }}
                     <div class="invalid feedback">
                         {% for error in object.form.name.errors %}
                             <span> {{ error }} </span>
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ object.form.name(class="form-control form-control-sm") }}
+                    {{ object.form.fc_name(class="form-control form-control-sm") }}
                 {% endif %}
 
                 {{ object.form.amount.label(class="form-control-label") }}
@@ -98,16 +98,16 @@
               <span>(give one example - you will have the chance to add more later)</span>
             </header>
             {% for object in form.goals %}
-                {{ object.form.name.label(class="form-control-label") }}
-                {% if object.form.name.errors %}
-                    {{ object.form.name(class="form-control form-control-sm is-invalid") }}
+                {{ object.form.goal_name.label(class="form-control-label") }}
+                {% if object.form.goal_name.errors %}
+                    {{ object.form.goal_name(class="form-control form-control-sm is-invalid") }}
                     <div class="invalid feedback">
                         {% for error in object.form.name.errors %}
                             <span> {{ error }} </span>
                         {% endfor %}
                     </div>
                 {% else %}
-                    {{ object.form.name(class="form-control form-control-sm") }}
+                    {{ object.form.goal_name(class="form-control form-control-sm") }}
                 {% endif %}
 
                 {{ object.form.amount.label(class="form-control-label") }}

@@ -15,6 +15,8 @@ class Users(db.Model, UserMixin):
     email = db.Column(db.String(120), nullable=False, unique=True)
     password_hash = db.Column(db.String(128))
     financial_data = db.relationship('Userfinancialdata', backref='user_financial_data', lazy=True)
+    fixed_costs = db.relationship('FixedCost', backref='financialdata', lazy=True)
+    goals = db.relationship('Goals', backref='financialdata', lazy=True)
 
 
 class Userfinancialdata(db.Model):
@@ -22,23 +24,22 @@ class Userfinancialdata(db.Model):
     gross_salary = db.Column(db.Float, nullable=False)
     student_plan = db.Column(db.Integer)
     pension_contribution = db.Column(db.Float, nullable=False)
-    fixed_costs = db.relationship('FixedCost', backref='financialdata', lazy=True)
-    goals = db.relationship('Goals', backref='financialdata', lazy=True)
-    user = db.Column(db.Integer, db.ForeignKey('users.id'))
+    saving_percentage = db.Column(db.Float, nullable=False)
+    user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
 
 class FixedCost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable=False)
     amount = db.Column(db.Float, nullable=False)
-    earnings_id = db.Column(db.Integer, db.ForeignKey("userfinancialdata.id"), nullable=False)
+    user = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
 
 class Goals(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable=False)
     amount = db.Column(db.Float, nullable=False)
-    earnings_id = db.Column(db.Integer, db.ForeignKey("userfinancialdata.id"), nullable=False)
+    user = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
 
 # Create database tables
@@ -59,10 +60,17 @@ def user_is_logged_in():
     return current_user.is_authenticated
 
 
+def financial_data_exists():
+    return Userfinancialdata.query.filter_by(user=current_user.id).first()
+
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    if user_is_logged_in():
+    if user_is_logged_in() and financial_data_exists() is not None:
         return redirect(url_for('dashboard'))
+
+    elif user_is_logged_in():
+        return redirect(url_for('setup'))
 
     form = UserForm()
     if form.validate_on_submit():
@@ -72,7 +80,7 @@ def signup():
             user = Users(email=form.email.data, password_hash=hashed_pw)
             db.session.add(user)
             db.session.commit()
-            flash("Successful sign up! Please login:", 'success')
+            flash("Successful sign up! Please fill in the following details to set up your account", 'success')
 
         else:
             flash("User email already exists! Please login", 'danger')
@@ -85,8 +93,11 @@ def signup():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if user_is_logged_in():
+    if user_is_logged_in() and financial_data_exists() is not None:
         return redirect(url_for('dashboard'))
+
+    elif user_is_logged_in():
+        return redirect(url_for('setup'))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -114,13 +125,28 @@ def login():
 @app.route("/setup", methods=['GET', 'POST'])
 @login_required
 def setup():
-    if current_user.financial_data is not None:
+    if financial_data_exists() is not None:
         flash("You have already input your financial data!", 'danger')
         return redirect(url_for('dashboard'))
 
     form = FinancialDataForm()
     
     if form.validate_on_submit():
+        financial_data = Userfinancialdata(gross_salary=form.gross_salary.data, student_plan=form.student_plan.data,
+                                           pension_contribution=form.pension_contribution.data, saving_percentage=form.saving_percentage.data,
+                                           user=current_user.id)
+        db.session.add(financial_data)
+
+        for goal in form.goals:
+            tmp_goal = Goals(name=goal.goal_name.data, amount=goal.amount.data, user=current_user.id)
+            db.session.add(tmp_goal)
+
+        for fixed_cost in form.fixed_costs:
+            tmp_fc = FixedCost(name=fixed_cost.fc_name.data, amount=fixed_cost.amount.data, user=current_user.id)
+            db.session.add(tmp_fc)
+
+        db.session.commit()
+
         flash("Setup complete!", 'success')
         return redirect(url_for('dashboard'))
 
@@ -136,7 +162,11 @@ def home():
 @app.route("/my_finances")
 @login_required
 def my_finances():
-    return render_template("my_finances.html")
+    form = FinancialDataForm()
+    financial_data = Userfinancialdata.query.filter_by(user=current_user.id).first()
+    fixed_costs = FixedCost.query.filter_by(user=current_user.id).first()
+    goals = Goals.query.filter_by(user=current_user.id).first()
+    return render_template("my_finances.html", form=form, financial_data=financial_data, fc_data=fixed_costs, goal_data=goals)
 
 
 @app.route("/dashboard")

@@ -2,6 +2,70 @@
 
 {% block content %}
 
-<h> This is the My Finances Page</h>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    <fieldset class="form-group">
+        <legend class="border-bottom mb-4"> View and edit your finances and goals!</legend>
+
+        <div class = "col-md-6">
+            <header>
+                  <h5>General</h5>
+            </header>
+            <div class="form-group">
+                {{ form.gross_salary.label(class="form-control-label") }}
+                {% if form.gross_salary.errors %}
+                    {{ form.gross_salary(class="form-control form-control-sm is-invalid", value=financial_data.gross_salary) }}
+                    <div class="invalid feedback">
+                        {% for error in form.gross_salary.errors %}
+                            <span> {{ error }} </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.gross_salary(class="form-control form-control-sm", value=financial_data.gross_salary) }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.student_plan.label(class="form-control-label") }}
+                {% if form.student_plan.errors %}
+                    {{ form.student_plan(class="form-control form-control-sm is-invalid", value=financial_data.student_plan) }}
+                    <div class="invalid feedback">
+                        {% for error in form.student_plan.errors %}
+                            <span> {{ error }} </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.student_plan(class="form-control form-control-sm", value=financial_data.student_plan) }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.pension_contribution.label(class="form-control-label") }}
+                {% if form.pension_contribution.errors %}
+                    {{ form.pension_contribution(class="form-control form-control-sm is-invalid", value=financial_data.pension_contribution) }}
+                    <div class="invalid feedback">
+                        {% for error in form.pension_contribution.errors %}
+                            <span> {{ error }} </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.pension_contribution(class="form-control form-control-sm", value=financial_data.pension_contribution) }}
+                {% endif %}
+            </div>
+            <div class="form-group">
+                {{ form.saving_percentage.label(class="form-control-label") }}
+                {% if form.saving_percentage.errors %}
+                    {{ form.saving_percentage(class="form-control form-control-sm is-invalid", value=financial_data.saving_percentage) }}
+                    <div class="invalid feedback">
+                        {% for error in form.saving_percentage.errors %}
+                            <span> {{ error }} </span>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {{ form.saving_percentage(class="form-control form-control-sm", value=financial_data.saving_percentage) }}
+                {% endif %}
+            </div>
+        </div>
+
+    </fieldset>
+</form>
 
 {% endblock %}
