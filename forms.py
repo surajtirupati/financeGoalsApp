@@ -4,16 +4,18 @@ from wtforms.validators import DataRequired, NumberRange, EqualTo
 
 
 # Create Fixed Cost Sub-Form
-class FixedCostForm(Form):
+class FixedCostForm(FlaskForm):
     fc_name = StringField("Fixed Cost Name e.g. Rent", validators=[DataRequired()])
     amount = FloatField("Fixed Cost Monthly Amount e.g. 800", validators=[DataRequired()])
+    submit = SubmitField('Add')
 
 
 # Create Goal Sub-Form
-class GoalForm(Form):
+class GoalForm(FlaskForm):
     goal_name = StringField("What are you saving for?", validators=[DataRequired()])
     amount = FloatField("What percentage of your savings would you like to allocate to this goal? e.g. 0.25 for 25%",
                         validators=[DataRequired(), NumberRange(min=0, max=1, message='Enter number between 0 and 1')])
+    submit_goal = SubmitField('Add')
 
 
 # Create Financial Data Form

@@ -7,63 +7,208 @@
     <fieldset class="form-group">
         <legend class="border-bottom mb-4"> View and edit your finances and goals!</legend>
 
-        <div class = "col-md-6">
-            <header>
-                  <h5>General</h5>
-            </header>
-            <div class="form-group">
-                {{ form.gross_salary.label(class="form-control-label") }}
-                {% if form.gross_salary.errors %}
-                    {{ form.gross_salary(class="form-control form-control-sm is-invalid", value=financial_data.gross_salary) }}
-                    <div class="invalid feedback">
-                        {% for error in form.gross_salary.errors %}
-                            <span> {{ error }} </span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.gross_salary(class="form-control form-control-sm", value=financial_data.gross_salary) }}
-                {% endif %}
+        <header>
+            <h5>General</h5>
+        </header>
+
+        <div class="row">
+            <div class = "col-md-6">
+                <div class="form-group">
+                    {{ form.gross_salary.label(class="form-control-label") }}
+                    {% if form.gross_salary.errors %}
+                        {{ form.gross_salary(class="form-control form-control-sm is-invalid", value=financial_data.gross_salary) }}
+                        <div class="invalid feedback">
+                            {% for error in form.gross_salary.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.gross_salary(class="form-control form-control-sm", value=financial_data.gross_salary) }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.student_plan.label(class="form-control-label") }}
+                    {% if form.student_plan.errors %}
+                        {{ form.student_plan(class="form-control form-control-sm is-invalid", value=financial_data.student_plan) }}
+                        <div class="invalid feedback">
+                            {% for error in form.student_plan.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.student_plan(class="form-control form-control-sm", value=financial_data.student_plan) }}
+                    {% endif %}
+                </div>
             </div>
-            <div class="form-group">
-                {{ form.student_plan.label(class="form-control-label") }}
-                {% if form.student_plan.errors %}
-                    {{ form.student_plan(class="form-control form-control-sm is-invalid", value=financial_data.student_plan) }}
-                    <div class="invalid feedback">
-                        {% for error in form.student_plan.errors %}
-                            <span> {{ error }} </span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.student_plan(class="form-control form-control-sm", value=financial_data.student_plan) }}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.pension_contribution.label(class="form-control-label") }}
-                {% if form.pension_contribution.errors %}
-                    {{ form.pension_contribution(class="form-control form-control-sm is-invalid", value=financial_data.pension_contribution) }}
-                    <div class="invalid feedback">
-                        {% for error in form.pension_contribution.errors %}
-                            <span> {{ error }} </span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.pension_contribution(class="form-control form-control-sm", value=financial_data.pension_contribution) }}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.saving_percentage.label(class="form-control-label") }}
-                {% if form.saving_percentage.errors %}
-                    {{ form.saving_percentage(class="form-control form-control-sm is-invalid", value=financial_data.saving_percentage) }}
-                    <div class="invalid feedback">
-                        {% for error in form.saving_percentage.errors %}
-                            <span> {{ error }} </span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.saving_percentage(class="form-control form-control-sm", value=financial_data.saving_percentage) }}
-                {% endif %}
+
+            <div class = "col-md-6">
+                <div class="form-group">
+                    {{ form.pension_contribution.label(class="form-control-label") }}
+                    {% if form.pension_contribution.errors %}
+                        {{ form.pension_contribution(class="form-control form-control-sm is-invalid", value=financial_data.pension_contribution) }}
+                        <div class="invalid feedback">
+                            {% for error in form.pension_contribution.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.pension_contribution(class="form-control form-control-sm", value=financial_data.pension_contribution) }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.saving_percentage.label(class="form-control-label") }}
+                    {% if form.saving_percentage.errors %}
+                        {{ form.saving_percentage(class="form-control form-control-sm is-invalid", value=financial_data.saving_percentage) }}
+                        <div class="invalid feedback">
+                            {% for error in form.saving_percentage.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.saving_percentage(class="form-control form-control-sm", value=financial_data.saving_percentage) }}
+                    {% endif %}
+                </div>
             </div>
         </div>
+
+        <br>
+
+        <div class="row">
+
+            <div class="col-md-6">
+                <header>
+                    <h5>Fixed Costs</h5>
+                </header>
+
+                {% if fc_data %}
+                <table class="table table-striped table-dark">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Fixed Cost</th>
+                            <th scope="col">Monthly Amount</th>
+                            <th scope="col">Annual Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for fc in fc_data %}
+                        <tr>
+                            <th scope="row">{{ fc.id }}</th>
+                            <td>{{ fc.name }}</td>
+                            <td>{{ fc.amount }}</td>
+                            <td>{{ 12 * fc.amount }}</td>
+                        </tr>
+                    {% endfor %}
+                        <tr>
+                            <th scope="row">*</th>
+                            <td>Total</td>
+                            <td>{{ total_fc }}</td>
+                            <td>{{ 12 * total_fc }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% endif %}
+
+                <form class="form-inline" method="POST">
+                  <div class="input-group">
+                      <div class="form-group">
+                        {% if fc_form.fc_name.errors %}
+                            {{ fc_form.fc_name(class="form-control form-control is-invalid", placeholder="Fixed Cost") }}
+                            <div class="invalid feedback">
+                                {% for error in fc_form.fc_name.errors %}
+                                    <span> {{ error }} </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ fc_form.fc_name(class="form-control form-control", placeholder="Fixed Cost") }}
+                        {% endif %}
+                      </div>
+                      <div class="form-group">
+                        {% if fc_form.amount.errors %}
+                            {{ fc_form.amount(class="form-control form-control is-invalid", placeholder="Amount") }}
+                            <div class="invalid feedback">
+                                {% for error in fc_form.amount.errors %}
+                                    <span> {{ error }} </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ fc_form.amount(class="form-control form-control", placeholder="Amount") }}
+                        {% endif %}
+                      </div>
+                      <div class="form-group">
+                          {{ fc_form.submit(class="btn btn-primary mb-2") }}
+                      </div>
+                  </div>
+                </form>
+
+            </div>
+
+            <div class="col-md-6">
+                <header>
+                    <h5>Goals</h5>
+                </header>
+
+                {% if goal_data %}
+                <table class="table table-striped table-dark">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Goal</th>
+                            <th scope="col">% of Saving Income</th>
+                            <th scope="col">Monthly Amount</th>
+                            <th scope="col">Annual Amount</th>
+                        </tr>
+                    </thead>
+                    {% for goal in goal_data %}
+                    <tbody>
+                        <tr>
+                            <th scope="row">{{ goal.id }}</th>
+                            <td>{{ goal.name }}</td>
+                            <td>{{ 100 * goal.amount }}%</td>
+                            <td>{{ (goal.amount * saving_income)|int}}</td>
+                            <td>{{ 12 * (goal.amount * saving_income)|int}}</td>
+                        </tr>
+                    </tbody>
+                    {% endfor %}
+                </table>
+                {% endif %}
+
+                <form class="form-inline" method="POST">
+                  <div class="input-group">
+                      <div class="form-group">
+                        {% if goals_form.goal_name.errors %}
+                            {{ goals_form.goal_name(class="form-control form-control is-invalid", placeholder="Goal") }}
+                            <div class="invalid feedback">
+                                {% for error in goals_form.goal_name.errors %}
+                                    <span> {{ error }} </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ goals_form.goal_name(class="form-control form-control", placeholder="Goal") }}
+                        {% endif %}
+                      </div>
+                      <div class="form-group">
+                        {% if goals_form.amount.errors %}
+                            {{ goals_form.amount(class="form-control form-control is-invalid", placeholder="% of Saving Income") }}
+                            <div class="invalid feedback">
+                                {% for error in goals_form.amount.errors %}
+                                    <span> {{ error }} </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ goals_form.amount(class="form-control form-control", placeholder="% of Saving Income") }}
+                        {% endif %}
+                      </div>
+                      <div class="form-group">
+                          {{ goals_form.submit_goal(class="btn btn-primary mb-2") }}
+                      </div>
+                  </div>
+                </form>
+
+            </div>
+
+        </div>
+
 
     </fieldset>
 </form>

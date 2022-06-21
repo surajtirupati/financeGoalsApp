@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from forms import FinancialDataForm, LoginForm, UserForm
+from forms import FinancialDataForm, LoginForm, UserForm, FixedCostForm, GoalForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
+from calculations import disposable_income, deduct_fixed_costs, total_fixed_costs, calculate_saving_income
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'fefbb128d6df70ee4c3d697223e80958'
@@ -130,10 +131,11 @@ def setup():
         return redirect(url_for('dashboard'))
 
     form = FinancialDataForm()
-    
+
     if form.validate_on_submit():
         financial_data = Userfinancialdata(gross_salary=form.gross_salary.data, student_plan=form.student_plan.data,
-                                           pension_contribution=form.pension_contribution.data, saving_percentage=form.saving_percentage.data,
+                                           pension_contribution=form.pension_contribution.data,
+                                           saving_percentage=form.saving_percentage.data,
                                            user=current_user.id)
         db.session.add(financial_data)
 
@@ -159,14 +161,43 @@ def home():
     return render_template("base.html")
 
 
-@app.route("/my_finances")
+@app.route("/my_finances", methods=['GET', 'POST'])
 @login_required
 def my_finances():
-    form = FinancialDataForm()
     financial_data = Userfinancialdata.query.filter_by(user=current_user.id).first()
-    fixed_costs = FixedCost.query.filter_by(user=current_user.id).first()
-    goals = Goals.query.filter_by(user=current_user.id).first()
-    return render_template("my_finances.html", form=form, financial_data=financial_data, fc_data=fixed_costs, goal_data=goals)
+    fixed_costs = FixedCost.query.filter_by(user=current_user.id).all()
+    goals = Goals.query.filter_by(user=current_user.id).all()
+
+    form = FinancialDataForm(student_plan=financial_data.student_plan)
+    fc_form = FixedCostForm()
+    goals_form = GoalForm()
+
+    if goals_form.is_submitted() and goals_form.submit_goal.data:
+        if type(goals_form.goal_name.data) == str and type(goals_form.amount.data) == float and 1 > goals_form.amount.data > 0:
+            tmp_goal = Goals(name=goals_form.goal_name.data, amount=goals_form.amount.data, user=current_user.id)
+            db.session.add(tmp_goal)
+            db.session.commit()
+            return redirect(url_for("my_finances"))
+        else:
+            flash("Please ensure you enter text for goal name and a number between 0 and 1 for it's % of saving income!", "danger")
+            return redirect(url_for("my_finances"))
+
+    if fc_form.validate_on_submit() and fc_form.submit.data:
+        print("fs")
+        tmp_fc = FixedCost(name=fc_form.fc_name.data, amount=fc_form.amount.data, user=current_user.id)
+        db.session.add(tmp_fc)
+        db.session.commit()
+        return redirect(url_for("my_finances"))
+
+    annual_disposable_inc = disposable_income(financial_data.gross_salary, financial_data.student_plan,
+                                              financial_data.pension_contribution)
+    total_fcs = total_fixed_costs(fixed_costs)
+    personal_inc = deduct_fixed_costs(annual_disposable_inc / 12, fixed_costs)
+    saving_inc = int(calculate_saving_income(personal_inc, financial_data.saving_percentage))
+
+    return render_template("my_finances.html", form=form, fc_form=fc_form, goals_form=goals_form,
+                           financial_data=financial_data, fc_data=fixed_costs, goal_data=goals,
+                           total_fc=total_fcs, saving_income=saving_inc)
 
 
 @app.route("/dashboard")

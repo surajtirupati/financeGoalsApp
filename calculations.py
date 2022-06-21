@@ -1,4 +1,4 @@
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Union
 from numpy_financial import irr
 
 PLAN_1_MNTHLY_THRES = 1682
@@ -40,10 +40,10 @@ def less_ni_contributions(gross: float) -> float:
     return ni_cont
 
 
-def less_student_loan(gross: float, plan: int) -> float:
+def less_student_loan(gross: float, plan: Union[int, None]) -> float:
     annual_student_loan = 0
 
-    if plan == 0:
+    if plan is None:
         return annual_student_loan
 
     if plan == 1:
@@ -62,18 +62,22 @@ def less_pension_contributions(gross: float, pension_perc: float) -> float:
     return pension_cont
 
 
-def disposable_income(gross: float, plan: int, pension_perc: float) -> float:
+def disposable_income(gross: float, plan: Union[int, None], pension_perc: float) -> float:
     d_income = calculate_income_less_tax(gross)[0] - less_ni_contributions(gross) - less_student_loan(gross, plan) - \
                less_pension_contributions(gross, pension_perc)
     return d_income
 
 
-def deduct_fixed_costs(disposable: float, fcs: [dict[float], list[float]]) -> float:
-    if type(fcs) == dict:
-        personal_income = disposable - sum(fcs.values())
+def total_fixed_costs(fixed_costs):
+    total_fc = 0
+    for fc in fixed_costs:
+        total_fc += fc.amount
 
-    else:
-        personal_income = disposable - sum(fcs)
+    return total_fc
+
+
+def deduct_fixed_costs(disposable: float, fixed_costs) -> float:
+    personal_income = disposable - total_fixed_costs(fixed_costs)
 
     return personal_income
 
