@@ -10,6 +10,7 @@
     <title>Simple Sidebar - Start Bootstrap Template</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 
 </head>
@@ -22,10 +23,10 @@
     <div class="bg-light border-right" id="sidebar-wrapper">
         <div class="sidebar-heading">Financial Goal Tracker</div>
         <div class="list-group list-group-flush">
-            <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action bg-light">Dashboard</a>
-            <a href="{{ url_for('my_finances') }}" class="list-group-item list-group-item-action bg-light">My Finances</a>
-            <a href="{{ url_for('goal_progress') }}" class="list-group-item list-group-item-action bg-light">Goal Progress</a>
-            <a href="{{ url_for('custom_goal') }}" class="list-group-item list-group-item-action bg-light">Custom Goal Calculator</a>
+            <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action bg-light"><i class="bi bi-kanban"></i> Dashboard</a>
+            <a href="{{ url_for('my_finances') }}" class="list-group-item list-group-item-action bg-light"><i class="bi bi-coin"></i> My Finances</a>
+            <a href="{{ url_for('goal_progress') }}" class="list-group-item list-group-item-action bg-light"><i class="bi bi-graph-up-arrow"></i> Goal Progress</a>
+            <a href="{{ url_for('custom_goal') }}" class="list-group-item list-group-item-action bg-light"><i class="bi bi-robot"></i> Custom Goal Calculator</a>
         </div>
     </div>
     <!-- /#sidebar-wrapper -->
@@ -34,7 +35,7 @@
     <div id="page-content-wrapper">
 
         <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom" id="navbarMain">
-            <button class="btn btn-primary" id="menu-toggle">Menu</button>
+            <button class="btn btn-primary" id="menu-toggle"><i class="bi bi-layout-sidebar-inset"></i> Menu</button>
 
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,17 +45,17 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="{{ url_for('dashboard') }}"><i class="bi bi-kanban"></i> Dashboard <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="bi bi-file-person-fill"></i>
                             Account
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="#">Edit Finances</a>
+                            <a class="dropdown-item" href="{{ url_for('my_finances') }}"><i class="bi bi-coin"></i> Edit Finances</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ url_for('logout') }}">Log Out</a>
+                            <a class="dropdown-item" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-in-left"></i> Log Out</a>
                         </div>
                     </li>
                 </ul>
@@ -86,7 +87,6 @@
 <!-- Bootstrap core JavaScript -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-
 <!-- Menu Toggle Script -->
 <script>
     $("#menu-toggle").click(function (e) {
