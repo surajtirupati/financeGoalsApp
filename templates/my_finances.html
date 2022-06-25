@@ -5,73 +5,80 @@
 <form method="POST" action="">
     {{ form.hidden_tag() }}
     <fieldset class="form-group">
-        <legend class="border-bottom mb-4"> View and edit your finances and goals!</legend>
+
+        <div class="jumbotron jumbotron-fluid">
+          <div class="container">
+            <h1 class="display-4">View and edit your finances</h1>
+            <p class="lead">This section details your financial data such as gross salary, take home pay, income
+            after fixed costs (personal income), and savings. You can edit the metrics in the table by altering the
+            number and pressing the 'Update' button. You can also add and delete new fixed costs and financial goals.</p>
+          </div>
+        </div>
 
         <header>
             <h5>General</h5>
         </header>
 
         <div class="row">
-            <div class = "col-md-6">
-                <div class="form-group">
-                    {{ form.gross_salary.label(class="form-control-label") }}
-                    {% if form.gross_salary.errors %}
-                        {{ form.gross_salary(class="form-control form-control-sm is-invalid", value=financial_data.gross_salary) }}
-                        <div class="invalid feedback">
-                            {% for error in form.gross_salary.errors %}
-                                <span> {{ error }} </span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.gross_salary(class="form-control form-control-sm", value=financial_data.gross_salary) }}
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    {{ form.student_plan.label(class="form-control-label") }}
-                    {% if form.student_plan.errors %}
-                        {{ form.student_plan(class="form-control form-control-sm is-invalid", value=financial_data.student_plan) }}
-                        <div class="invalid feedback">
-                            {% for error in form.student_plan.errors %}
-                                <span> {{ error }} </span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.student_plan(class="form-control form-control-sm", value=financial_data.student_plan) }}
-                    {% endif %}
-                </div>
-            </div>
+            <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Gross Salary</th>
+                            <th scope="col">Disposable Income (Take Home Pay)</th>
+                            <th scope="col">Annual Fixed Costs</th>
+                            <th scope="col">Personal Income</th>
+                            <th scope="col">% of P.I to Save</th>
+                            <th scope="col">Annual Savings</th>
+                            <th scope="col">Student Plan</th>
+                            <th scope="col">Pension Contribution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">*</th>
+                            <td>
+                                {% if form.gross_salary.errors %}
+                                {{ form.gross_salary(class="form-control form-control-sm is-invalid", value=financial_data.gross_salary) }}
+                                <div class="invalid feedback">
+                                    {% for error in form.gross_salary.errors %}
+                                        <span> {{ error }} </span>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                    {{ form.gross_salary(class="form-control form-control-sm", value=financial_data.gross_salary) }}
+                                {% endif %}
+                            </td>
+                            <td>{{ financial_data.disposable_income }}</td>
+                            <td>{{ 12 * financial_data.total_fixed_costs }}</td>
+                            <td>{{ (12 * financial_data.personal_income)|round(2) }}</td>
+                            <td>
+                                {% if form.saving_percentage.errors %}
+                                {{ form.saving_percentage(class="form-control form-control-sm is-invalid", value=financial_data.saving_percentage) }}
+                                <div class="invalid feedback">
+                                    {% for error in form.saving_percentage.errors %}
+                                        <span> {{ error }} </span>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                    {{ form.saving_percentage(class="form-control form-control-sm", value=financial_data.saving_percentage) }}
+                                {% endif %}
+                            </td>
+                            <td>{{ (12 * financial_data.saving_income)|round(2) }}</td>
+                            <td>{{ form.student_plan(class="form-control form-control-sm", value=financial_data.student_plan) }}</td>
+                            <td>{{ form.pension_contribution(class="form-control form-control-sm", value=financial_data.pension_contribution) }}</td>
+                        </tr>
+                    </tbody>
+            </table>
 
-            <div class = "col-md-6">
-                <div class="form-group">
-                    {{ form.pension_contribution.label(class="form-control-label") }}
-                    {% if form.pension_contribution.errors %}
-                        {{ form.pension_contribution(class="form-control form-control-sm is-invalid", value=financial_data.pension_contribution) }}
-                        <div class="invalid feedback">
-                            {% for error in form.pension_contribution.errors %}
-                                <span> {{ error }} </span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.pension_contribution(class="form-control form-control-sm", value=financial_data.pension_contribution) }}
-                    {% endif %}
+            <form class="form-inline" method="POST">
+                <div class="col text-center">
+                    <div class="form-group">
+                        {{ form.update(class="btn btn-primary mb-2") }}
+                    </div>
                 </div>
-                <div class="form-group">
-                    {{ form.saving_percentage.label(class="form-control-label") }}
-                    {% if form.saving_percentage.errors %}
-                        {{ form.saving_percentage(class="form-control form-control-sm is-invalid", value=financial_data.saving_percentage) }}
-                        <div class="invalid feedback">
-                            {% for error in form.saving_percentage.errors %}
-                                <span> {{ error }} </span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.saving_percentage(class="form-control form-control-sm", value=financial_data.saving_percentage) }}
-                    {% endif %}
-                </div>
-            </div>
+            </form>
         </div>
-
-        <br>
 
         <div class="row">
 
@@ -81,7 +88,7 @@
                 </header>
 
                 {% if fc_data %}
-                <table class="table table-striped table-dark">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th scope="col">#</th>
@@ -149,7 +156,7 @@
                 </header>
 
                 {% if goal_data %}
-                <table class="table table-striped table-dark">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th scope="col">#</th>

@@ -9,14 +9,19 @@ NI_PRIMARY_THRESH = 823
 def calculate_income_less_tax(gross: float) -> Tuple[float, float]:
     inc_less_tax = 12570
 
-    if gross <= 50270:
+    if gross <= inc_less_tax:
+        inc_less_tax = gross
+        annual_tax = 0
+        return inc_less_tax, annual_tax
+
+    if 50270 >= gross > 12570:
         inc_less_tax += 0.8 * (gross - 12570)
 
-    elif gross <= 150000:
+    elif 150000 >= gross > 50270:
         inc_less_tax += 0.8 * (50270 - 12570)
         inc_less_tax += 0.6 * (gross - 50270)
 
-    else:
+    elif gross > 150000:
         inc_less_tax += 0.8 * (50270 - 12570)
         inc_less_tax += 0.6 * (150000 - 50270)
         inc_less_tax += 0.55 * (gross - 150000)
@@ -90,7 +95,7 @@ def calculate_goal_targets(saving_inc: float, goals: Dict[str, float]) -> Dict[s
     goal_amount_dict = {}
     for k, v in goals:
         goal_amount_dict[k] = saving_inc * v
-        
+
     return goal_amount_dict
 
 
@@ -98,6 +103,8 @@ def interest_required(monthly_payment: float, target: float, time_in_mths: float
     v = [monthly_payment for i in range(time_in_mths)]
     v.append(-target)
     req_mth_ret = irr(v)
-    req_ann_ret = (1+req_mth_ret)**12 - 1
+    req_ann_ret = (1 + req_mth_ret) ** 12 - 1
     return req_mth_ret, req_ann_ret
 
+
+print()

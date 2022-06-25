@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from forms import FinancialDataForm, LoginForm, UserForm, FixedCostForm, GoalForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
@@ -9,6 +10,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'fefbb128d6df70ee4c3d697223e80958'
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///financial_app.db"
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 
 class Users(db.Model, UserMixin):
@@ -27,6 +29,10 @@ class Userfinancialdata(db.Model):
     pension_contribution = db.Column(db.Float, nullable=False)
     saving_percentage = db.Column(db.Float, nullable=False)
     user = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    disposable_income = db.Column(db.Float)
+    total_fixed_costs = db.Column(db.Float)
+    personal_income = db.Column(db.Float)
+    saving_income = db.Column(db.Float)
 
 
 class FixedCost(db.Model):
@@ -137,16 +143,26 @@ def setup():
                                            pension_contribution=form.pension_contribution.data,
                                            saving_percentage=form.saving_percentage.data,
                                            user=current_user.id)
-        db.session.add(financial_data)
+
+        financial_data.disposable_income = round(
+            float(disposable_income(financial_data.gross_salary, financial_data.student_plan,
+                                    financial_data.pension_contribution)), 2)
 
         for goal in form.goals:
             tmp_goal = Goals(name=goal.goal_name.data, amount=goal.amount.data, user=current_user.id)
             db.session.add(tmp_goal)
 
         for fixed_cost in form.fixed_costs:
+            financial_data.total_fixed_costs = fixed_cost.amount.data  # only one fixed cost at this point
             tmp_fc = FixedCost(name=fixed_cost.fc_name.data, amount=fixed_cost.amount.data, user=current_user.id)
             db.session.add(tmp_fc)
 
+        financial_data.personal_income = round(
+            float((financial_data.disposable_income / 12) - financial_data.total_fixed_costs), 2)
+        financial_data.saving_income = round(float(
+            calculate_saving_income(financial_data.personal_income, financial_data.saving_percentage)), 2)
+
+        db.session.add(financial_data)
         db.session.commit()
 
         flash("Setup complete!", 'success')
@@ -173,31 +189,48 @@ def my_finances():
     goals_form = GoalForm()
 
     if goals_form.is_submitted() and goals_form.submit_goal.data:
-        if type(goals_form.goal_name.data) == str and type(goals_form.amount.data) == float and 1 > goals_form.amount.data > 0:
+        if type(goals_form.goal_name.data) == str and type(
+                goals_form.amount.data) == float and 1 > goals_form.amount.data > 0:
             tmp_goal = Goals(name=goals_form.goal_name.data, amount=goals_form.amount.data, user=current_user.id)
             db.session.add(tmp_goal)
             db.session.commit()
             return redirect(url_for("my_finances"))
         else:
-            flash("Please ensure you enter text for goal name and a number between 0 and 1 for it's % of saving income!", "danger")
+            flash(
+                "Please ensure you enter text for goal name and a number between 0 and 1 for it's % of saving income!",
+                "danger")
             return redirect(url_for("my_finances"))
 
     if fc_form.validate_on_submit() and fc_form.submit.data:
-        print("fs")
         tmp_fc = FixedCost(name=fc_form.fc_name.data, amount=fc_form.amount.data, user=current_user.id)
         db.session.add(tmp_fc)
         db.session.commit()
         return redirect(url_for("my_finances"))
 
-    annual_disposable_inc = disposable_income(financial_data.gross_salary, financial_data.student_plan,
-                                              financial_data.pension_contribution)
-    total_fcs = total_fixed_costs(fixed_costs)
-    personal_inc = deduct_fixed_costs(annual_disposable_inc / 12, fixed_costs)
-    saving_inc = int(calculate_saving_income(personal_inc, financial_data.saving_percentage))
+    if form.is_submitted() and form.update.data:
+        financial_data.gross_salary = form.gross_salary.data
+        financial_data.saving_percentage = form.saving_percentage.data
+        financial_data.student_plan = form.student_plan.data
+        financial_data.pension_contribution = form.pension_contribution.data
+        db.session.add(financial_data)
+        db.session.commit()
+        return redirect(url_for("my_finances"))
+
+    financial_data.disposable_income = round(
+        float(disposable_income(financial_data.gross_salary, financial_data.student_plan,
+                                financial_data.pension_contribution)), 2)
+    financial_data.total_fixed_costs = total_fixed_costs(fixed_costs)
+    financial_data.personal_income = round(
+        float(deduct_fixed_costs(financial_data.disposable_income / 12, fixed_costs)), 2)
+    financial_data.saving_income = round(float(
+        calculate_saving_income(financial_data.personal_income, financial_data.saving_percentage)), 2)
+
+    db.session.add(financial_data)
+    db.session.commit()
 
     return render_template("my_finances.html", form=form, fc_form=fc_form, goals_form=goals_form,
                            financial_data=financial_data, fc_data=fixed_costs, goal_data=goals,
-                           total_fc=total_fcs, saving_income=saving_inc)
+                           total_fc=financial_data.total_fixed_costs, saving_income=financial_data.saving_income)
 
 
 @app.route("/dashboard")
