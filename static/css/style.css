@@ -80,3 +80,10 @@ header > h5 { display: inline-block; }
   overflow-x: hidden;
   padding-top: 20px;
 }
+
+.card {
+    margin: 0 auto; /* Added */
+    float: none; /* Added */
+    margin-bottom: 10px; /* Added */
+    background-color: #301934 !important;
+}
