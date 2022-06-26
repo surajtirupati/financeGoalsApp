@@ -27,6 +27,11 @@
   min-width: 100vw;
 }
 
+#post-login{
+  /*width:800px !important; /*change the value to suite ur need*/
+  margin:0 auto; /*this will center ur content*/
+}
+
 #pre-login{
   width:800px !important; /*change the value to suite ur need*/
   margin:0 auto; /*this will center ur content*/

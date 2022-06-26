@@ -1,5 +1,10 @@
 from typing import Tuple, Dict, Union
 from numpy_financial import irr
+import plotly.express as px
+import plotly
+import json
+from math import log10, floor
+
 
 PLAN_1_MNTHLY_THRES = 1682
 PLAN_2_MNTHLY_THRES = 2274
@@ -99,7 +104,7 @@ def calculate_goal_targets(saving_inc: float, goals: Dict[str, float]) -> Dict[s
     return goal_amount_dict
 
 
-def interest_required(monthly_payment: float, target: float, time_in_mths: float) -> Tuple[float, float]:
+def interest_required(monthly_payment: float, target: float, time_in_mths: int) -> Tuple[float, float]:
     v = [monthly_payment for i in range(time_in_mths)]
     v.append(-target)
     req_mth_ret = irr(v)
@@ -107,4 +112,82 @@ def interest_required(monthly_payment: float, target: float, time_in_mths: float
     return req_mth_ret, req_ann_ret
 
 
-print()
+def round_sig(x, sig=3):
+    return round(x, sig-int(floor(log10(abs(x))))-1)
+
+
+def income_funnel(gross, disposable, personal, saving, annual=True):
+    if annual:
+        money = [gross, round_sig(disposable, 3), round_sig(personal, 3), round_sig(saving, 3)]
+
+    else:
+        money = [gross / 12, round(disposable / 12, 2), round(personal / 12, 2), round(saving / 12, 2)]
+
+    data = dict(
+        money=money,
+        stage=["Gross Salary", "Take Home Pay", "Spending Money", "Income Saved"])
+
+    fig = px.funnel(data, x='money', y='stage')
+
+    fig.update_layout(
+        font=dict(
+            family="Verdana",
+            size=18,
+            color="Black"
+        ),
+        yaxis={'visible': False, 'showticklabels': True}
+    )
+
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return graphJSON
+
+
+def income_funnel_perc(gross, disposable, personal, saving):
+
+    data = dict(
+            money=[100, 100*round(disposable/gross, 3), 100*round(personal/gross, 3), 100*round(saving/gross, 3)],
+            stage=["Gross salary", "% of Gross taken home", "% of Gross for personal spending", "% of Gross for saving"])
+
+    fig = px.funnel(data, x='money', y='stage')
+
+    fig.update_layout(
+        yaxis_title="Your Income Funnel , % View",
+        font=dict(
+            family="Verdana",
+            size=18,
+            color="Black"
+        )
+    )
+
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return graphJSON
+
+
+def income_pie_chart(taxes_and_insurance, fixed_costs, personal, saving):
+    values = [taxes_and_insurance, fixed_costs, personal, saving]
+    labels = ["Taxes", "Expenses", "Spending Money", "Savings"]
+    fig = px.pie(labels, values=values, hole=0.4,
+                 names=labels, color=labels,
+                 color_discrete_map={'Spending Money': 'seablue',
+                                     'Taxes': 'darkred',
+                                     'Expenses': 'magenta',
+                                     'Savings': 'green'
+                                     })
+    fig.update_traces(
+        title_font=dict(size=25, family='Verdana',
+                        color='darkred'),
+        hoverinfo='label+percent',
+        textinfo='percent', textfont_size=20)
+
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return graphJSON
+
+
+def return_perc_drops(gross, disposable, personal, saving):
+    drop_one = round((1 - disposable/gross) * 100, 1)
+    drop_two = round((1 - personal/disposable) * 100, 1)
+    drop_three = round((1 - saving/personal) * 100, 1)
+    return drop_one, drop_two, drop_three

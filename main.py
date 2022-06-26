@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from forms import FinancialDataForm, LoginForm, UserForm, FixedCostForm, GoalForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
-from calculations import disposable_income, deduct_fixed_costs, total_fixed_costs, calculate_saving_income
+from calculations import disposable_income, deduct_fixed_costs, total_fixed_costs, calculate_saving_income, income_pie_chart, income_funnel
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'fefbb128d6df70ee4c3d697223e80958'
@@ -236,7 +236,14 @@ def my_finances():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html")
+    # variable calculation
+    financial_data = Userfinancialdata.query.filter_by(user=current_user.id).first()
+    taxes_and_insurance = financial_data.gross_salary - financial_data.disposable_income
+    lifestyle_income = financial_data.personal_income - financial_data.saving_income
+
+    graph = income_pie_chart(taxes_and_insurance, 12*financial_data.total_fixed_costs, 12*lifestyle_income, 12*financial_data.saving_income)
+    graph2 = income_funnel(financial_data.gross_salary, financial_data.disposable_income, 12*financial_data.personal_income, 12*financial_data.saving_income)
+    return render_template("dashboard.html", graphJSON=graph, graphJSON2=graph2)
 
 
 @app.route("/goal_progress")

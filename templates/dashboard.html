@@ -2,6 +2,39 @@
 
 {% block content %}
 
-<h> This is the Dashboard Page</h>
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="display-4">View a breakdown of your financial dashboard!</h1>
+        <p class="lead">This section visualises your financial situation via charts and graphs and allows you to
+        bring life to the way you monitor your finances.</p>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-6">
+        <h5 style="text-align:center">Income Breakdown Pie Chart</h5>
+        <div id="chart" class="chart"></div>
+    </div>
+    <div class="col-md-6">
+        <h5 style="text-align:center">Your Money Funnel</h5>
+        <div id="chart2" class="chart"></div>
+    </div>
+</div>
+
+
+
+
+<script>
+    d = {{ graphJSON | safe }};
+    //d.config={staticPlot: true};
+    Plotly.newPlot('chart', d, {});
+</script>
+
+<script>
+    d = {{ graphJSON2 | safe }};
+    //d.config={staticPlot: true};
+    Plotly.newPlot('chart2', d, {});
+</script>
 
 {% endblock %}
