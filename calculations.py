@@ -194,9 +194,9 @@ def return_perc_drops(gross, disposable, personal, saving):
 
 def return_dashboard_cards_text(d1, d2, d3, inc_no_debt, inc_debt):
     c1_text = "After deducting taxes, national insurance contributions, and student loan repayments; your disposable income " \
-              "is {}% of your gross income.".format(round(d1, 2))
+              "is {}% of your gross income.".format(100 - round(d1, 2))
 
-    c2_text = "{}% of your disposable income (take home pay) is used up by your monthly fixed expenses such as rent, utilities " \
+    c2_text = "{}% of your disposable income (take home pay) is used up on your monthly fixed expenses such as rent, utilities " \
               "and any other fixed expenses you've input on the My Finances page.".format(round(d2, 2))
 
     c3_text = "Out of the remaining income you have to spend on your lifestyle and save; {}% is being used up on your lifestyle " \
