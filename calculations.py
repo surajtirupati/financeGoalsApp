@@ -5,7 +5,6 @@ import plotly
 import json
 from math import log10, floor
 
-
 PLAN_1_MNTHLY_THRES = 1682
 PLAN_2_MNTHLY_THRES = 2274
 NI_PRIMARY_THRESH = 823
@@ -53,7 +52,7 @@ def less_ni_contributions(gross: float) -> float:
 def less_student_loan(gross: float, plan: Union[int, None]) -> float:
     annual_student_loan = 0
 
-    if plan is None:
+    if plan is None or plan == 0:
         return annual_student_loan
 
     if plan == 1:
@@ -113,7 +112,7 @@ def interest_required(monthly_payment: float, target: float, time_in_mths: int) 
 
 
 def round_sig(x, sig=3):
-    return round(x, sig-int(floor(log10(abs(x))))-1)
+    return round(x, sig - int(floor(log10(abs(x)))) - 1)
 
 
 def income_funnel(gross, disposable, personal, saving, annual=True):
@@ -144,10 +143,10 @@ def income_funnel(gross, disposable, personal, saving, annual=True):
 
 
 def income_funnel_perc(gross, disposable, personal, saving):
-
     data = dict(
-            money=[100, 100*round(disposable/gross, 3), 100*round(personal/gross, 3), 100*round(saving/gross, 3)],
-            stage=["Gross salary", "% of Gross taken home", "% of Gross for personal spending", "% of Gross for saving"])
+        money=[100, 100 * round(disposable / gross, 3), 100 * round(personal / gross, 3),
+               100 * round(saving / gross, 3)],
+        stage=["Gross salary", "% of Gross taken home", "% of Gross for personal spending", "% of Gross for saving"])
 
     fig = px.funnel(data, x='money', y='stage')
 
@@ -187,7 +186,23 @@ def income_pie_chart(taxes_and_insurance, fixed_costs, personal, saving):
 
 
 def return_perc_drops(gross, disposable, personal, saving):
-    drop_one = round((1 - disposable/gross) * 100, 1)
-    drop_two = round((1 - personal/disposable) * 100, 1)
-    drop_three = round((1 - saving/personal) * 100, 1)
+    drop_one = round((1 - disposable / gross) * 100, 1)
+    drop_two = round((1 - personal / disposable) * 100, 1)
+    drop_three = round((1 - saving / personal) * 100, 1)
     return drop_one, drop_two, drop_three
+
+
+def return_dashboard_cards_text(d1, d2, d3, inc_no_debt, inc_debt):
+    c1_text = "After deducting taxes, national insurance contributions, and student loan repayments; your disposable income " \
+              "is {}% of your gross income.".format(round(d1, 2))
+
+    c2_text = "{}% of your disposable income (take home pay) is used up by your monthly fixed expenses such as rent, utilities " \
+              "and any other fixed expenses you've input on the My Finances page.".format(round(d2, 2))
+
+    c3_text = "Out of the remaining income you have to spend on your lifestyle and save; {}% is being used up on your lifestyle " \
+              "while the remaining {}% is saved.".format(round(d3, 2), 100 - round(d3, 2))
+
+    c4_text = "Your disposable income with your current student debt is {}. If your debt was completely paid off your disposable " \
+              "income would be {}. This is an increase of {}%.".format(inc_debt, inc_no_debt, round(100*((inc_no_debt/inc_debt) - 1), 2))
+
+    return c1_text, c2_text, c3_text, c4_text

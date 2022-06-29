@@ -4,7 +4,8 @@ from flask_migrate import Migrate
 from forms import FinancialDataForm, LoginForm, UserForm, FixedCostForm, GoalForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
-from calculations import disposable_income, deduct_fixed_costs, total_fixed_costs, calculate_saving_income, income_pie_chart, income_funnel
+from calculations import disposable_income, deduct_fixed_costs, total_fixed_costs, calculate_saving_income, \
+    income_pie_chart, income_funnel, return_perc_drops, return_dashboard_cards_text
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'fefbb128d6df70ee4c3d697223e80958'
@@ -241,9 +242,23 @@ def dashboard():
     taxes_and_insurance = financial_data.gross_salary - financial_data.disposable_income
     lifestyle_income = financial_data.personal_income - financial_data.saving_income
 
-    graph = income_pie_chart(taxes_and_insurance, 12*financial_data.total_fixed_costs, 12*lifestyle_income, 12*financial_data.saving_income)
-    graph2 = income_funnel(financial_data.gross_salary, financial_data.disposable_income, 12*financial_data.personal_income, 12*financial_data.saving_income)
-    return render_template("dashboard.html", graphJSON=graph, graphJSON2=graph2)
+    # income without student debt
+    inc_w_out_debt = round(
+        float(disposable_income(financial_data.gross_salary, 0, financial_data.pension_contribution)), 2)
+
+    # rendering card text
+    pct_1, pct_2, pct_3 = return_perc_drops(financial_data.gross_salary, financial_data.disposable_income,
+                                            12 * financial_data.personal_income, 12 * financial_data.saving_income)
+    card_1_text, card_2_text, card_3_text, card_4_text = return_dashboard_cards_text(pct_1, pct_2, pct_3,
+                                                                                     inc_w_out_debt,
+                                                                                     financial_data.disposable_income)
+
+    graph = income_pie_chart(taxes_and_insurance, 12 * financial_data.total_fixed_costs, 12 * lifestyle_income,
+                             12 * financial_data.saving_income)
+    graph2 = income_funnel(financial_data.gross_salary, financial_data.disposable_income,
+                           12 * financial_data.personal_income, 12 * financial_data.saving_income)
+    return render_template("dashboard.html", graphJSON=graph, graphJSON2=graph2, c1=card_1_text, c2=card_2_text,
+                           c3=card_3_text, c4=card_4_text)
 
 
 @app.route("/goal_progress")
