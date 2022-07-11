@@ -5,7 +5,8 @@ from forms import FinancialDataForm, LoginForm, UserForm, FixedCostForm, GoalFor
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from calculations import disposable_income, deduct_fixed_costs, total_fixed_costs, calculate_saving_income, \
-    income_pie_chart, income_funnel, return_perc_drops, return_dashboard_cards_text
+    income_pie_chart, income_funnel, return_perc_drops, return_dashboard_cards_text, full_horizon_compound, \
+    plot_compound_and_standard, linear_investing
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'fefbb128d6df70ee4c3d697223e80958'
@@ -47,6 +48,7 @@ class Goals(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    target = db.Column(db.Float)
     user = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
 
@@ -191,14 +193,14 @@ def my_finances():
 
     if goals_form.is_submitted() and goals_form.submit_goal.data:
         if type(goals_form.goal_name.data) == str and type(
-                goals_form.amount.data) == float and 1 > goals_form.amount.data > 0:
-            tmp_goal = Goals(name=goals_form.goal_name.data, amount=goals_form.amount.data, user=current_user.id)
+                goals_form.amount.data) == float and 1 > goals_form.amount.data > 0 and type(goals_form.target.data) == float:
+            tmp_goal = Goals(name=goals_form.goal_name.data, amount=goals_form.amount.data, target=goals_form.target.data, user=current_user.id)
             db.session.add(tmp_goal)
             db.session.commit()
             return redirect(url_for("my_finances"))
         else:
             flash(
-                "Please ensure you enter text for goal name and a number between 0 and 1 for it's % of saving income!",
+                "Please ensure you enter text for goal name, a number for the target, and a number between 0 and 1 for it's % of saving income!",
                 "danger")
             return redirect(url_for("my_finances"))
 
@@ -242,6 +244,21 @@ def dashboard():
     taxes_and_insurance = financial_data.gross_salary - financial_data.disposable_income
     lifestyle_income = financial_data.personal_income - financial_data.saving_income
 
+    # goal graph variable collection
+    goal_to_display = Goals.query.filter_by(user=current_user.id).first()
+    compound_rate = 0.08
+    monthly_payment = goal_to_display.amount * financial_data.saving_income
+    goal_target = goal_to_display.target
+
+    # linear calculation
+    linear_progression, time_axis = linear_investing(goal_target, monthly_payment)
+    # compound calculation
+    compound_progression, _, time_to_reach_goal = full_horizon_compound(monthly_payment, compound_rate, goal_target, time_axis[-1])
+    # compound vs linear graph
+    goal_graph = plot_compound_and_standard(goal_target, time_axis[-1], compound_rate, time_axis, linear_progression,
+                                            compound_progression, time_to_reach_goal)
+
+
     # income without student debt
     inc_w_out_debt = round(
         float(disposable_income(financial_data.gross_salary, 0, financial_data.pension_contribution)), 2)
@@ -257,8 +274,8 @@ def dashboard():
                              12 * financial_data.saving_income)
     graph2 = income_funnel(financial_data.gross_salary, financial_data.disposable_income,
                            12 * financial_data.personal_income, 12 * financial_data.saving_income)
-    return render_template("dashboard.html", graphJSON=graph, graphJSON2=graph2, c1=card_1_text, c2=card_2_text,
-                           c3=card_3_text, c4=card_4_text)
+    return render_template("dashboard.html", graphJSON=graph, graphJSON2=graph2, graphJSON3=goal_graph, c1=card_1_text,
+                           c2=card_2_text, c3=card_3_text, c4=card_4_text, name_of_goal=goal_to_display.name)
 
 
 @app.route("/goal_progress")

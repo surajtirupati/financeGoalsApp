@@ -1,9 +1,10 @@
 from typing import Tuple, Dict, Union
 from numpy_financial import irr
 import plotly.express as px
+import plotly.graph_objects as go
 import plotly
 import json
-from math import log10, floor
+from math import log10, floor, ceil
 
 PLAN_1_MNTHLY_THRES = 1682
 PLAN_2_MNTHLY_THRES = 2274
@@ -206,3 +207,54 @@ def return_dashboard_cards_text(d1, d2, d3, inc_no_debt, inc_debt):
               "income would be {}. This is an increase of {}%.".format(inc_debt, inc_no_debt, round(100*((inc_no_debt/inc_debt) - 1), 2))
 
     return c1_text, c2_text, c3_text, c4_text
+
+
+def linear_investing(goal, monthly_payment):
+    linear_progression = [i * monthly_payment for i in range(1, ceil(goal / monthly_payment) + 1)]
+    time_axis = [i for i in range(1, ceil(goal / monthly_payment) + 1)]
+    return linear_progression, time_axis
+
+
+def full_horizon_compound(monthly, interest, goal, total_horizon, annual=True):
+
+    if annual:
+        interest = (1 + interest)**(1/12) - 1
+
+    progress = [monthly*(1+interest)]
+    total = monthly
+
+    month_count = 2
+
+    while month_count <= total_horizon:
+        donation = monthly * (1 + interest)**month_count
+        progress.append(donation + progress[-1])
+        total += donation
+        month_count += 1
+
+        if progress[-1] > goal > progress[-2]:
+            time_to_reach_goal = len(progress)
+
+    months = [i for i in range(1, len(progress)+1)]
+
+    return progress, months, time_to_reach_goal
+
+
+def plot_compound_and_standard(goal, total_horizon, interest, months, linear_progression, compound_progression, time_to_reach):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=months, y=linear_progression, fill='tozeroy'))  # fill down to xaxis
+    fig.add_trace(go.Scatter(x=months, y=compound_progression, fill='tonexty'))  # fill to trace0 y
+    fig.add_trace(go.Scatter(x=(0, total_horizon), y=(goal, goal)))  # fill to trace0 y
+    fig.add_trace(go.Scatter(x=(time_to_reach, time_to_reach), y=(0, goal)))  # fill to trace0 y
+
+    fig['data'][0]['showlegend']=True
+    fig['data'][1]['showlegend']=True
+    fig['data'][2]['showlegend']=True
+    fig['data'][3]['showlegend'] = True
+    fig['data'][0]['name']='With no interest'
+    fig['data'][1]['name']='With {}% interest'.format(100 * interest)
+    fig['data'][2]['name']='Target'
+    fig['data'][3]['name'] = 'Time to reach goal'
+
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return graphJSON

@@ -160,7 +160,8 @@
                     <thead>
                         <tr>
                             <th scope="col">#</th>
-                            <th scope="col">Goal</th>
+                            <th scope="col">Goal Name</th>
+                            <th scope="col">Financial Target</th>
                             <th scope="col">% of Saving Income</th>
                             <th scope="col">Monthly Amount</th>
                             <th scope="col">Annual Amount</th>
@@ -171,6 +172,7 @@
                         <tr>
                             <th scope="row">{{ goal.id }}</th>
                             <td>{{ goal.name }}</td>
+                            <td>{{ goal.target }}</td>
                             <td>{{ 100 * goal.amount }}%</td>
                             <td>{{ (goal.amount * saving_income)|int}}</td>
                             <td>{{ 12 * (goal.amount * saving_income)|int}}</td>
@@ -184,14 +186,26 @@
                   <div class="input-group">
                       <div class="form-group">
                         {% if goals_form.goal_name.errors %}
-                            {{ goals_form.goal_name(class="form-control form-control is-invalid", placeholder="Goal") }}
+                            {{ goals_form.goal_name(class="form-control form-control is-invalid", placeholder="Goal (name)") }}
                             <div class="invalid feedback">
                                 {% for error in goals_form.goal_name.errors %}
                                     <span> {{ error }} </span>
                                 {% endfor %}
                             </div>
                         {% else %}
-                            {{ goals_form.goal_name(class="form-control form-control", placeholder="Goal") }}
+                            {{ goals_form.goal_name(class="form-control form-control", placeholder="Goal (name)") }}
+                        {% endif %}
+                      </div>
+                      <div class="form-group">
+                        {% if goals_form.target.errors %}
+                            {{ goals_form.target(class="form-control form-control is-invalid", placeholder="Saving target (£)") }}
+                            <div class="invalid feedback">
+                                {% for error in goals_form.target.errors %}
+                                    <span> {{ error }} </span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ goals_form.target(class="form-control form-control", placeholder="Saving target (£)") }}
                         {% endif %}
                       </div>
                       <div class="form-group">

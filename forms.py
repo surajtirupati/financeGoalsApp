@@ -15,6 +15,7 @@ class GoalForm(FlaskForm):
     goal_name = StringField("What are you saving for?", validators=[DataRequired()])
     amount = FloatField("What percentage of your savings would you like to allocate to this goal? e.g. 0.25 for 25%",
                         validators=[DataRequired(), NumberRange(min=0, max=1, message='Enter number between 0 and 1')])
+    target = FloatField("How much are you trying to save for this goal?")
     submit_goal = SubmitField('Add')
 
 

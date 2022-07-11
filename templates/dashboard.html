@@ -65,6 +65,25 @@
 </div>
 
 
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="card h-100">
+          <div class="card-body">
+              <h5 class="card-title text-dark" style="text-align:center">Impact of Compounding on your {{name_of_goal}} Financial Goal</h5>
+              <div id="chart3" class="chart"></div>
+          </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card h-100">
+            <div class="card-header">Placeholder title</div>
+            <div class="card-body py-5">Placeholder text</div>
+        </div>
+    </div>
+</div>
+
+
 
 
 <script>
@@ -77,6 +96,12 @@
     d = {{ graphJSON2 | safe }};
     //d.config={staticPlot: true};
     Plotly.newPlot('chart2', d, {});
+</script>
+
+<script>
+    d = {{ graphJSON3 | safe }};
+    //d.config={staticPlot: true};
+    Plotly.newPlot('chart3', d, {});
 </script>
 
 {% endblock %}
